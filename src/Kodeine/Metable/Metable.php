@@ -149,7 +149,7 @@ trait Metable
      */
     public function metas()
     {
-        $model = new ($this->getMetaModel())();
+        $model = new $this->getMetaModel();
         $model->setTable($this->getMetaTable());
 
         return new HasMany($model->newQuery(), $this, $this->getMetaKeyName(), $this->getKeyName());
@@ -181,7 +181,7 @@ trait Metable
     protected function getModelStub()
     {
         // get new meta model instance
-        $model = new ($this->getMetaModel())();
+        $model = new $this->getMetaModel();
         $model->setTable($this->getMetaTable());
 
         // model fill with attributes.
