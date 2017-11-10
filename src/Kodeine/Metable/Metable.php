@@ -8,15 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
-    
     /**
      * Meta scope for easier join
      * -------------------------
      */
     public function scopeMeta($query)
     {
-        return $query->join($this->table.'_meta', $this->table.'.id', '=', $this->table.'_meta.'.$this->getMetaKeyName())
-            ->select($this->table.'.*');
+        return $query->join($this->getMetaTable(), $this->table . '.id', '=', $this->getMetaTable() . '.' . $this->getMetaKeyName())
+            ->select($this->table . '.*');
     }
 
     /**
@@ -150,7 +149,7 @@ trait Metable
      */
     public function metas()
     {
-        $model = new \Kodeine\Metable\MetaData();
+        $model = new ($this->getMetaModel())();
         $model->setTable($this->getMetaTable());
 
         return new HasMany($model->newQuery(), $this, $this->getMetaKeyName(), $this->getKeyName());
@@ -182,8 +181,8 @@ trait Metable
     protected function getModelStub()
     {
         // get new meta model instance
-        $model = new \Kodeine\Metable\MetaData();
-        $model->setTable($this->metaTable);
+        $model = new ($this->getMetaModel())();
+        $model->setTable($this->getMetaTable());
 
         // model fill with attributes.
         if (func_num_args() > 0) {
@@ -196,7 +195,7 @@ trait Metable
     protected function saveMeta()
     {
         foreach ($this->metaData as $meta) {
-            $meta->setTable($this->metaTable);
+            $meta->setTable($this->getMetaTable());
 
             if ($meta->isMarkedForDeletion()) {
                 $meta->delete();
@@ -260,6 +259,16 @@ trait Metable
     protected function getMetaTable()
     {
         return isset($this->metaTable) ? $this->metaTable : $this->getTable().'_meta';
+    }
+
+    /**
+     * Return the meta model name.
+     *
+     * @return null
+     */
+    protected function getMetaModel()
+    {
+        return isset($this->metaModel) ? $this->metaModel : MetaData::class;
     }
 
     /**
